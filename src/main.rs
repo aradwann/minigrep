@@ -1,16 +1,19 @@
 // lets implement cargo run -- searchstring examplefilename.txt
 
-use std::{env, fs};
+use minigrep::Config;
+use std::{env, process};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let query = &args[1];
-    let file_path = &args[2];
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("problem parsing arguments {err}");
+        process::exit(1);
+    });
+    println!("searching for {}", config.query);
+    println!("from the file {}", config.file_path);
 
-    println!("searching for {}", query);
-    println!("from the file {}", file_path);
-
-    let contents = fs::read_to_string(file_path).expect("should have been able to read the file");
-    println!("with text:\n {contents}");
-
+    if let Err(e) = minigrep::run(config) {
+        println!("Application error {e}");
+        process::exit(1);
+    }
 }
